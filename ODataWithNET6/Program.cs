@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ODataWithNET6.Contexts.DBContexts;
+using ODataWithNET6.DataAccess.Abstract;
+using ODataWithNET6.DataAccess.Concrete;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<NoteAppContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
 );
+
+builder.Services.AddTransient<INotesRepository, NotesRepository>();
 
 var app = builder.Build();
 
