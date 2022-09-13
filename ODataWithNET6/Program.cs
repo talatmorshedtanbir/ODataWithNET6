@@ -27,7 +27,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "ODataTutorial", Version = "v1" });
+    c.SwaggerDoc("v1", new() { Title = "ODataWithNET6", Version = "v1" });
 });
 
 // Add services to the container.

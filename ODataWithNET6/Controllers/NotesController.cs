@@ -10,8 +10,6 @@ using ODataWithNET6.Entities;
 
 namespace ODataWithNET6.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
     public class NotesController : ODataController
     {
         private readonly NoteAppContext _db;
