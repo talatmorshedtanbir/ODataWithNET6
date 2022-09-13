@@ -25,6 +25,11 @@ builder.Services.AddControllers()
     .Select()
     .Expand());
 
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "ODataTutorial", Version = "v1" });
+});
+
 // Add services to the container.
 builder.Services.AddDbContext<NoteAppContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
@@ -36,15 +41,16 @@ builder.Services.AddTransient<INotesService, NotesService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ODataTutorial v1"));
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.MapControllers();
 
 app.UseRouting();
 
