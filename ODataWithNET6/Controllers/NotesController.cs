@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
-using Microsoft.EntityFrameworkCore;
 using ODataWithNET6.Contexts.DBContexts;
 using ODataWithNET6.Entities;
 
@@ -45,37 +43,37 @@ namespace ODataWithNET6.Controllers
             return Created(note);
         }
 
-        [EnableQuery]
-        public async Task<IActionResult> Patch([FromODataUri] Guid key, Delta<Note> note)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var existingNote = await _db.Notes.FindAsync(key);
-            if (existingNote == null)
-            {
-                return NotFound();
-            }
+        //[EnableQuery]
+        //public async Task<IActionResult> Patch([FromODataUri] Guid key, Delta<Note> note)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+        //    var existingNote = await _db.Notes.FindAsync(key);
+        //    if (existingNote == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            note.Patch(existingNote);
-            try
-            {
-                await _db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!NoteExists(key))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return Updated(existingNote);
-        }
+        //    note.Patch(existingNote);
+        //    try
+        //    {
+        //        await _db.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!NoteExists(key))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
+        //    return Updated(existingNote);
+        //}
 
         [EnableQuery]
         public async Task<IActionResult> Delete([FromODataUri] Guid key)
