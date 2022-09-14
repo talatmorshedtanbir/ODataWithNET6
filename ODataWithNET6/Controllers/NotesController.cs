@@ -1,9 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Deltas;
-using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Results;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using ODataWithNET6.Contexts.DBContexts;
 using ODataWithNET6.Entities;
@@ -12,7 +8,7 @@ namespace ODataWithNET6.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class NotesController : ODataController
+    public class NotesController : ControllerBase
     {
         private readonly NoteAppContext _db;
 
@@ -26,41 +22,49 @@ namespace ODataWithNET6.Controllers
 
         [HttpGet]
         [EnableQuery(PageSize = 15)]
-        public IQueryable<Note> Get()
+        public IEnumerable<Note> Get()
         {
             return _db.Notes;
         }
 
         [HttpGet("key")]
         [EnableQuery()]
-        public SingleResult<Note> Get([FromODataUri] Guid key)
+        public IActionResult Get([FromRoute] Guid key)
         {
             var result = _db.Notes.Where(c => c.Id == key);
-            return SingleResult.Create(result);
+
+            return Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Note note)
         {
-            _db.Notes.Add(note);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _db.Notes.AddAsync(note);
             await _db.SaveChangesAsync();
-            return Created(note);
+
+            return CreatedAtAction("Get", new { key = note.Id }, note);
         }
 
         [HttpPut("{key}")]
-        public async Task<IActionResult> Patch([FromODataUri] Guid key, Delta<Note> note)
+        public async Task<IActionResult> Put([FromRoute] Guid key, [FromBody] Note note)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var existingNote = await _db.Notes.FindAsync(key);
-            if (existingNote == null)
+
+            if (key != note.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            note.Patch(existingNote);
+            _db.Entry(note).State = EntityState.Modified;
+
             try
             {
                 await _db.SaveChangesAsync();
@@ -76,21 +80,28 @@ namespace ODataWithNET6.Controllers
                     throw;
                 }
             }
-            return Updated(existingNote);
+
+            return NoContent();
         }
 
         [HttpDelete("key")]
-        public async Task<IActionResult> Delete([FromODataUri] Guid key)
+        public async Task<IActionResult> Delete([FromRoute] Guid key)
         {
-            Note existingNote = await _db.Notes.FindAsync(key);
-            if (existingNote == null)
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var student = await _db.Notes.FindAsync(key);
+            if (student == null)
             {
                 return NotFound();
             }
 
-            _db.Notes.Remove(existingNote);
+            _db.Notes.Remove(student);
             await _db.SaveChangesAsync();
-            return StatusCode(StatusCodes.Status204NoContent);
+
+            return Ok(student);
         }
 
         [HttpGet("noteexists/{ket}")]
