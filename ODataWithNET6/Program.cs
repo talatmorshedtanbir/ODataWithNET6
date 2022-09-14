@@ -13,6 +13,7 @@ static IEdmModel GetEdmModel()
 {
     ODataConventionModelBuilder builder = new();
     builder.EntitySet<Note>("Notes");
+    builder.EntitySet<Student>("Students");
     return builder.GetEdmModel();
 }
 
