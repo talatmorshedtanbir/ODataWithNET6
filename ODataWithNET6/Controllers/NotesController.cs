@@ -10,28 +10,28 @@ namespace ODataWithNET6.Controllers
     [ApiController]
     public class NotesController : ControllerBase
     {
-        private readonly NoteAppContext _db;
+        private readonly NoteAppContext _context;
 
         private readonly ILogger<NotesController> _logger;
 
         public NotesController(NoteAppContext dbContext, ILogger<NotesController> logger)
         {
             _logger = logger;
-            _db = dbContext;
+            _context = dbContext;
         }
 
         [HttpGet]
         [EnableQuery(PageSize = 15)]
         public IEnumerable<Note> Get()
         {
-            return _db.Notes;
+            return _context.Notes;
         }
 
         [HttpGet("key")]
         [EnableQuery()]
         public IActionResult Get([FromRoute] Guid key)
         {
-            var result = _db.Notes.Where(c => c.Id == key);
+            var result = _context.Notes.Where(c => c.Id == key);
 
             return Ok(result);
         }
@@ -44,8 +44,8 @@ namespace ODataWithNET6.Controllers
                 return BadRequest(ModelState);
             }
 
-            await _db.Notes.AddAsync(note);
-            await _db.SaveChangesAsync();
+            await _context.Notes.AddAsync(note);
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction("Get", new { key = note.Id }, note);
         }
@@ -63,11 +63,11 @@ namespace ODataWithNET6.Controllers
                 return BadRequest();
             }
 
-            _db.Entry(note).State = EntityState.Modified;
+            _context.Entry(note).State = EntityState.Modified;
 
             try
             {
-                await _db.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -92,14 +92,14 @@ namespace ODataWithNET6.Controllers
                 return BadRequest(ModelState);
             }
 
-            var student = await _db.Notes.FindAsync(key);
+            var student = await _context.Notes.FindAsync(key);
             if (student == null)
             {
                 return NotFound();
             }
 
-            _db.Notes.Remove(student);
-            await _db.SaveChangesAsync();
+            _context.Notes.Remove(student);
+            await _context.SaveChangesAsync();
 
             return Ok(student);
         }
@@ -107,7 +107,7 @@ namespace ODataWithNET6.Controllers
         [HttpGet("noteexists/{ket}")]
         private bool NoteExists(Guid key)
         {
-            return _db.Notes.Any(p => p.Id == key);
+            return _context.Notes.Any(p => p.Id == key);
         }
     }
 }
